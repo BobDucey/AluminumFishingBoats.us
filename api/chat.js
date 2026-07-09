@@ -1,4 +1,3 @@
-javascript
 // /api/chat.js
 // Receives the buyer's conversation from the website and forwards it to
 // Claude using the API key stored securely in Vercel's environment
