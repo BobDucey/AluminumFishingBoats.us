@@ -1,0 +1,7 @@
+{
+  "name": "aluminum-fishing-boats-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend for AluminumFishingBoats.us — connects the chat to Claude and saves leads to Supabase.",
+  "type": "module"
+}
