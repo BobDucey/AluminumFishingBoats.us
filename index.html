@@ -983,6 +983,7 @@ function showLeadCard(d) {
 
     leadEmail = email;
     leadZip = zip;
+    messages.push({ role: 'user', content: `(System note: this buyer already provided their zip code, ${zip}. Do not ask them for their zip code or location again.)` });
     leadCaptured = true;
 
     navSignupBtn.textContent = '✓ Signed Up Free';
