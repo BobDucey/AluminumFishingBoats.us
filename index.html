@@ -866,24 +866,39 @@ If any field wasn't mentioned, make a reasonable brief guess based on context, o
     matchCta.textContent = 'See my matches →';
   }
 
-  function showLeadCard(d) {
-    leadBody.innerHTML = `
-      <div class="headline">Here are your local boat matches</div>
-      <div class="subline">Matches are on their way to <strong style="color:var(--navy);">${escapeHtml(leadEmail || 'your email')}</strong>.</div>
-      <div class="lead-fields">
-        <div class="lead-field"><div class="label">USE CASE</div><div class="value">${escapeHtml(d.use_case)}</div></div>
-        <div class="lead-field"><div class="label">PEOPLE ABOARD</div><div class="value">${escapeHtml(d.people_aboard)}</div></div>
-        <div class="lead-field"><div class="label">LOCATION</div><div class="value">${escapeHtml(d.location)}</div></div>
-        <div class="lead-field"><div class="label">BUDGET / TIMELINE</div><div class="value">${escapeHtml(d.budget_timeline)}</div></div>
-      </div>
-      <div class="lead-summary">
-        <span class="label">CONVERSATION SUMMARY</span>
-        ${escapeHtml(d.summary)}
-      </div>
-      <div class="lead-actions">
-        <button class="btn-primary" id="keepChattingBtn" style="flex:1;">Keep chatting</button>
-      </div>
-    `;
+function showLeadCard(d) {
+  // Phase 1 dealer matching isn't live yet, so every buyer sees the honest
+  // "no match yet" state. Once /api/match.js exists, replace `false` below
+  // with the real match result.
+  const realMatchFound = false;
+
+  const headline = realMatchFound
+    ? 'Good news — we found a local dealer for you'
+    : "Unfortunately, we don't have a local dealer in your area yet";
+
+  const subline = realMatchFound
+    ? `A dealer near ${escapeHtml(d.location)} carries the boat you're looking for and will be contacting you shortly at <strong style="color:var(--navy);">${escapeHtml(leadEmail || 'your email')}</strong>.`
+    : `We're actively expanding our dealer network in ${escapeHtml(d.location)}. Your information has been saved, and we'll reach out as soon as a matching dealer joins.`;
+
+  leadBody.innerHTML = `
+    <div class="headline">${headline}</div>
+    <div class="subline">${subline}</div>
+    <div class="lead-fields">
+      <div class="lead-field"><div class="label">USE CASE</div><div class="value">${escapeHtml(d.use_case)}</div></div>
+      <div class="lead-field"><div class="label">PEOPLE ABOARD</div><div class="value">${escapeHtml(d.people_aboard)}</div></div>
+      <div class="lead-field"><div class="label">LOCATION</div><div class="value">${escapeHtml(d.location)}</div></div>
+      <div class="lead-field"><div class="label">BUDGET / TIMELINE</div><div class="value">${escapeHtml(d.budget_timeline)}</div></div>
+    </div>
+    <div class="lead-summary">
+      <span class="label">CONVERSATION SUMMARY</span>
+      ${escapeHtml(d.summary)}
+    </div>
+    <div class="lead-actions">
+      <button class="btn-primary" id="keepChattingBtn" style="flex:1;">Keep chatting</button>
+    </div>
+  `;
+
+
     leadOverlay.classList.add('show');
     document.getElementById('keepChattingBtn').onclick = () => leadOverlay.classList.remove('show');
   }
