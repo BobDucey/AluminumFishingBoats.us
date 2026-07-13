@@ -599,7 +599,6 @@
         <div class="chat-body" id="chatBody"><div class="bubble assistant">Welcome and thanks for joining us. Think of me as your Boating Showroom Salesman   We can talk by text or voice, and our service is always free. Towards the end of our conversation, I'll recommend boats that meet your expectations, and connect you with a selected Boat Dealer who sells those boats, and is close to your location. That's why we ask for your zip code. The dealer will send you information on those boats. Enjoy your shopping!</div></div>
 
         <div class="chat-foot">
-          <button class="match-cta" id="matchCta">See my matches →</button>
           <div class="input-row">
             <button class="icon-btn mic" id="micBtn" title="Speak instead of typing">🎤</button>
             <input type="text" id="chatInput" placeholder="Tell us about the aluminum fishing boat you need…" autocomplete="off">
@@ -701,7 +700,6 @@
   const sendBtn = document.getElementById('sendBtn');
   const micBtn = document.getElementById('micBtn');
   const voiceToggle = document.getElementById('voiceToggle');
-  const matchCta = document.getElementById('matchCta');
   const leadOverlay = document.getElementById('leadOverlay');
   const leadBody = document.getElementById('leadBody');
   const leadClose = document.getElementById('leadClose');
@@ -713,7 +711,8 @@ Rules:
 - Ask ONE short question per reply. Max 2 sentences.
 - Be conversational and specific to aluminum fishing boats (hull type, livewells, casting decks, trolling motors, jon boats vs. bass boats) when relevant — don't be generic about "boats."
 - Never ask for name, email, or phone — that happens after this chat.
-- Once you have their use case, group size, fishing details, docked-vs-trailered, general location, and a budget or timeline signal, thank them briefly and say you're pulling their matches — do not keep asking after that.
+- Once you have their use case, group size, fishing details, docked-vs-trailered, general location, and a budget or timeline signal, thank them briefly, tell them you're pulling their matches, then add a new final line containing exactly: MATCH_READY
+- That MATCH_READY line must be the very last line of your reply, alone, with nothing else on it. Never explain it to the user, never format it, and only include it the moment the conversation is truly complete.
 - Keep total replies short. No markdown, no bullet lists, just plain conversational text.`;
 
   let messages = [];
@@ -824,9 +823,17 @@ Rules:
     userTurns++;
 
     const typingEl = addTyping();
+    let matchReady = false;
     try {
-      const reply = await callClaude(messages);
+      const rawReply = await callClaude(messages);
       typingEl.remove();
+      const lines = rawReply.split('\n');
+      while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+      if (lines.length && lines[lines.length - 1].trim() === 'MATCH_READY') {
+        matchReady = true;
+        lines.pop();
+      }
+      const reply = lines.join('\n').trim();
       addBubble('assistant', reply);
       messages.push({ role: 'assistant', content: reply });
       speak(reply);
@@ -835,13 +842,13 @@ Rules:
       addBubble('assistant', "Having trouble connecting right now — mind trying again in a moment?");
     }
     sendBtn.disabled = false;
-    if (userTurns >= 3) matchCta.classList.add('show');
     saveLeadProgress();
+    if (matchReady) {
+      getMatches();
+    }
   }
 
   async function getMatches() {
-    matchCta.disabled = true;
-    matchCta.textContent = 'Pulling your matches…';
     const extractPrompt = `Based on the conversation so far, return ONLY a JSON object, nothing else, no markdown fences, with this exact shape:
 {"use_case":"...","people_aboard":"...","location":"...","budget_timeline":"...","summary":"2-3 sentence natural summary of what they're looking for, written in third person"}
 If any field wasn't mentioned, make a reasonable brief guess based on context, or use "Not specified".`;
@@ -862,8 +869,6 @@ If any field wasn't mentioned, make a reasonable brief guess based on context, o
     }
     showLeadCard(data);
     saveLeadProgress(data);
-    matchCta.disabled = false;
-    matchCta.textContent = 'See my matches →';
   }
 
 function showLeadCard(d) {
@@ -910,7 +915,6 @@ function showLeadCard(d) {
   // events
   sendBtn.addEventListener('click', () => trySend(chatInput.value));
   chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') trySend(chatInput.value); });
-  matchCta.addEventListener('click', getMatches);
   leadClose.addEventListener('click', () => leadOverlay.classList.remove('show'));
   voiceToggle.addEventListener('click', () => {
     voiceOn = !voiceOn;
