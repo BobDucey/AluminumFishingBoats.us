@@ -885,7 +885,7 @@ function addMatchResultBubble(d) {
     ? `A dealer near ${d.location} carries the boat you're looking for and will be contacting you shortly at ${leadEmail || 'your email'}.`
     : `We're actively expanding our dealer network in ${d.location}. Your information has been saved, and we'll reach out as soon as a matching dealer joins.`;
 
-  const text = `${headline} ${subline}\n\nJust to recap what I've got — ${d.summary}`;
+  const text = `${headline} ${subline}`;
 
   addBubble('assistant', text);
   messages.push({ role: 'assistant', content: text });
