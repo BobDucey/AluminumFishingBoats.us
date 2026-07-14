@@ -315,6 +315,14 @@
     font-size: 14px;
     line-height: 1.5;
   }
+  .bubble-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--teal-bright);
+    margin-bottom: 4px;
+  }
   .bubble.assistant {
     background: var(--card-dark-2);
     color: #E7EDEE;
@@ -574,8 +582,8 @@
     <div class="hero-grid">
       <div>
         <div class="eyebrow">Talk to us: Text/Voice</div>
-        <h1>Find Your Perfect Aluminum Fishing Boat — Have a Conversation with Your Boating Showroom Salesman (Always Free)</h1>
-        <p class="sub">Tell him you're looking for an aluminum fishing boat, new or used, your budget, when you expect to buy, and any other general requirements. Your Boating Showroom salesman will get you the answers (always free of charge)</p>
+        <h1>Find Your Perfect Aluminum Fishing Boat — Have a Conversation with Bob, Your Boating Showroom Salesman (Always Free)</h1>
+        <p class="sub">Tell him you're looking for an aluminum fishing boat, new or used, your budget, when you expect to buy, and any other general requirements. Bob, your Boating Showroom Salesman, will get you the answers (always free of charge)</p>
         <div class="trust-row">
           <div class="trust-item"><span class="tick">✓</span> Always Free</div>
           <div class="trust-item"><span class="tick">✓</span> No forms to fill out</div>
@@ -589,14 +597,14 @@
           <div class="chat-head-left">
             <div class="avatar">B</div>
             <div>
-              <div class="name">Boating Showroom Salesman</div>
+              <div class="name">Bob — Boating Showroom Salesman</div>
               <div class="status">● online now</div>
             </div>
           </div>
           <button class="voice-toggle" id="voiceToggle" title="Read replies aloud">🔊 Voice reply: off</button>
         </div>
 
-        <div class="chat-body" id="chatBody"><div class="bubble assistant">Welcome and thanks for joining us. Think of me as your Boating Showroom Salesman. Let's have a conversation on chat about your boating search, and our service is always free. Towards the end of our conversation, I'll connect you with a selected boat dealer near you who sells the type of boat you're looking for. That's why we ask for your zip code. The dealer will reach out to you directly. Enjoy your shopping!</div></div>
+        <div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Bob</span>Welcome and thanks for joining us. Think of me as Bob, your Boating Showroom Salesman. Let's have a conversation on chat about your boating search, and our service is always free. Towards the end of our conversation, I'll connect you with a “local” boat dealer near you (zip code) who sells the type of boat you're looking for. Your “local” dealer will reach out to you (email) about your boat. Enjoy your boat shopping!</div></div>
 
         <div class="chat-foot">
           <div class="input-row">
@@ -728,7 +736,13 @@ Rules:
   function addBubble(role, text) {
     const b = document.createElement('div');
     b.className = 'bubble ' + role;
-    b.textContent = text;
+    if (role === 'assistant') {
+      const label = document.createElement('span');
+      label.className = 'bubble-label';
+      label.textContent = 'Bob';
+      b.appendChild(label);
+    }
+    b.appendChild(document.createTextNode(text));
     chatBody.appendChild(b);
     chatBody.scrollTop = chatBody.scrollHeight;
     return b;
@@ -991,7 +1005,7 @@ function addMatchResultBubble(d) {
   });
 
   // opening message
-    messages.push({ role: 'assistant', content: "Welcome and thanks for joining us. Think of me as your Boating Showroom Salesman. Let's have a conversation on chat about your boating search, and our service is always free. Towards the end of our conversation, I'll connect you with a selected boat dealer near you who sells the type of boat you're looking for. That's why we ask for your zip code. The dealer will reach out to you directly. Enjoy your shopping!" });
+    messages.push({ role: 'assistant', content: "Welcome and thanks for joining us. Think of me as Bob, your Boating Showroom Salesman. Let's have a conversation on chat about your boating search, and our service is always free. Towards the end of our conversation, I'll connect you with a “local” boat dealer near you (zip code) who sells the type of boat you're looking for. Your “local” dealer will reach out to you (email) about your boat. Enjoy your boat shopping!" });
 })();
 </script>
 
