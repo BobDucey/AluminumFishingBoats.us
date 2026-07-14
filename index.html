@@ -582,10 +582,10 @@
     <div class="hero-grid">
       <div>
         <div class="eyebrow">Talk to us: Text/Voice</div>
-        <h1>Find Your Perfect Aluminum Fishing Boat — Have a Conversation with Bob, Your Boating Showroom Salesman (Always Free)</h1>
+        <h1>Find Your Perfect Aluminum Fishing Boat — Have a Conversation with Bob, Your Boating Showroom Salesman (always free)</h1>
         <p class="sub">Tell him you're looking for an aluminum fishing boat, new or used, your budget, when you expect to buy, and any other general requirements. Bob, your Boating Showroom Salesman, will get you the answers (always free of charge)</p>
         <div class="trust-row">
-          <div class="trust-item"><span class="tick">✓</span> Always Free</div>
+          <div class="trust-item"><span class="tick">✓</span> always free</div>
           <div class="trust-item"><span class="tick">✓</span> No forms to fill out</div>
           <div class="trust-item"><span class="tick">✓</span> Text or voice</div>
           <div class="trust-item"><span class="tick">✓</span> Closest dealer selling what you're looking for</div>
@@ -682,20 +682,26 @@
         <button class="close" id="gateClose">✕</button>
       </div>
       <div class="lead-card-body">
-        <div class="headline">Get your free boat matches</div>
-        <div class="subline">You're searching for: <strong id="gateQuery" style="color:var(--navy);">your next boat</strong>. Enter your email and zip so we can send you free matches near you.</div>
+        <div class="headline">Let's find your local dealer</div>
+        <div class="subline">You're searching for: <strong id="gateQuery" style="color:var(--navy);">your next boat</strong>. Just two quick details and Bob will take it from here.</div>
         <form id="gateForm">
-          <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:18px;">
-            <input required="" type="email" id="gateEmail" placeholder="Email address" style="padding:12px 14px; border-radius:10px; border:1px solid var(--border-light); font-size:14px; font-family:var(--sans);">
-            <input required="" type="text" id="gateZip" placeholder="Zip code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" style="padding:12px 14px; border-radius:10px; border:1px solid var(--border-light); font-size:14px; font-family:var(--sans);">
+          <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:18px;">
+            <div>
+              <input required="" type="text" id="gateZip" placeholder="Zip code" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" style="padding:12px 14px; border-radius:10px; border:1px solid var(--border-light); font-size:14px; font-family:var(--sans); width:100%; box-sizing:border-box;">
+              <div style="font-size:12px; color:var(--gray-text); margin-top:6px; line-height:1.4;">This lets us pick a local dealer near you who sells the type of boat you're looking for.</div>
+            </div>
+            <div>
+              <input required="" type="email" id="gateEmail" placeholder="Email address" style="padding:12px 14px; border-radius:10px; border:1px solid var(--border-light); font-size:14px; font-family:var(--sans); width:100%; box-sizing:border-box;">
+              <div style="font-size:12px; color:var(--gray-text); margin-top:6px; line-height:1.4;">So your local dealer can send you information about the boat you selected.</div>
+            </div>
           </div>
           <div class="lead-actions">
-            <button type="submit" class="btn-primary">Get My Free Matches</button>
+            <button type="submit" class="btn-primary">Find My Local Dealer</button>
             <button type="button" class="btn-ghost" id="gateCancel">Not now</button>
           </div>
         </form>
         <div style="font-size:11px; color:var(--gray-text); margin-top:14px; line-height:1.5;">
-          We'll use your search to find boats and offers near you. No spam, unsubscribe anytime.
+          We'll use this to connect you with a local dealer. No spam, unsubscribe anytime.
         </div>
       </div>
     </div>
@@ -958,7 +964,7 @@ function addMatchResultBubble(d) {
     pendingText = text || null;
     gateQuery.textContent = text ? `"${text}"` : 'your next boat';
     gateOverlay.classList.add('show');
-    setTimeout(() => document.getElementById('gateEmail').focus(), 50);
+    setTimeout(() => document.getElementById('gateZip').focus(), 50);
   }
 
   navSignupBtn.addEventListener('click', () => {
