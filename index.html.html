@@ -613,8 +613,8 @@ font-family: var(--mono);
 <div class="hero-grid">
 <div>
 <div class="eyebrow">Talk to us: Text/Voice</div>
-<h1>Chat with Capt. Bob — He'll Help You Find Your Next Aluminum Fishing Boat, Always Free</h1>
-<p class="sub">Hi, I'm Capt. Bob — your Personal Boat Advisor. I can help you find what you're looking for and connect you with the right local dealer.</p>
+<h1>Chat with Capt. Bob, Your Personal Boat Advisor — Always Free</h1>
+<p class="sub">Tell Capt. Bob what you're looking for — boat type, new or used, budget, and timeline — and he'll connect you with the right local dealer.</p>
 <div class="trust-row">
 <div class="trust-item"><span class="tick">✓</span> always free</div>
 <div class="trust-item"><span class="tick">✓</span> No forms to fill out</div>
@@ -628,19 +628,19 @@ font-family: var(--mono);
 <div class="chat-head-left">
 <div class="avatar">B</div>
 <div>
-<div class="name">Capt. Bob — Your Personal Boat Advisor</div>
+<div class="name">Capt. Bob — Personal Boat Advisor</div>
 <div class="status">● online now</div>
 </div>
 </div>
 <button class="voice-toggle" id="voiceToggle" title="Read replies aloud">🔊 Voice reply: off</button>
 </div>
 
-<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob — your “Personal Boat Advisor.” I'll match you with a local dealer who has the boat you are looking for. They'll follow up by email. Let's get started!</div></div>
+<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob, your Personal Boat Advisor! Tell me about your boating needs — I'll match you with a local dealer near your zip who has what you're looking for. They'll reach out by email. Let's get started!</div></div>
 
 <div class="chat-foot">
 <div class="input-row">
 <button class="icon-btn mic" id="micBtn" title="Speak instead of typing">🎤</button>
-<input type="text" id="chatInput" placeholder="Type your answer…" autocomplete="off">
+<input type="text" id="chatInput" placeholder="Tell us about the aluminum fishing boat you need…" autocomplete="off">
 <button class="icon-btn send" id="sendBtn" title="Send">➤</button>
 </div>
 </div>
@@ -761,8 +761,6 @@ You must ask about these 8 things IN THIS EXACT ORDER, one per reply, never skip
 7. Their budget for the boat.
 8. When they plan to buy.
 
-After all 8 of those core questions are answered, ask exactly ONE more bonus question before wrapping up: "How did you hear about us?" This is separate from the 8 qualifying questions above — never count it as one of them, never move it earlier, and never skip it.
-
 Rules:
 - Question 1 (boat type) works differently: keep that message to one short, friendly sentence (e.g. "To start, what type of boat are you looking for?") and do not list any boat type names yourself — the interface automatically shows the buyer a full selector. End that specific reply with a new final line containing exactly: SHOW_BOAT_TYPES
 - That SHOW_BOAT_TYPES line must be the very last line of that first reply, alone, with nothing else on it, and must only ever appear once, on that first question.
@@ -771,7 +769,7 @@ Rules:
 - Each reply is max 2 sentences.
 - Be conversational and specific to aluminum fishing boats (hull type, livewells, casting decks, trolling motors, jon boats vs. bass boats) when relevant — don't be generic about "boats."
 - Never ask for name, email, or phone — that happens after this chat.
-- Once the 8 core questions AND the "how did you hear about us" bonus question are all answered, thank them briefly, tell them you're pulling their matches, then add a new final line containing exactly: MATCH_READY
+- Once all 8 questions are answered, thank them briefly, tell them you're pulling their matches, then add a new final line containing exactly: MATCH_READY
 - That MATCH_READY line must be the very last line of your reply, alone, with nothing else on it. Never explain it to the user, never format it, and only include it the moment the conversation is truly complete.
 - Keep total replies short. No markdown, no bullet lists, just plain conversational text.`;
 
@@ -1117,7 +1115,7 @@ doSend(toSend);
 });
 
 // opening message
-messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob — your “Personal Boat Advisor.” I'll match you with a local dealer who has the boat you are looking for. They'll follow up by email. Let's get started!" });
+messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob, your Personal Boat Advisor! Tell me about your boating needs — I'll match you with a local dealer near your zip who has what you're looking for. They'll reach out by email. Let's get started!" });
 })();
 </script>
 
