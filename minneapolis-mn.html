@@ -387,7 +387,7 @@ animation: blink 1.2s infinite ease-in-out;
 .boat-picker-submit:disabled { opacity: .45; cursor: not-allowed; }
 
 .chat-foot {
-padding: 14px 16px;
+padding: 18px 18px 20px;
 border-top: 1px solid var(--border-dark);
 }
 .match-cta {
@@ -409,34 +409,39 @@ text-align: center;
 .match-cta.show { display: block; }
 .input-row {
 display: flex;
-gap: 8px;
+gap: 10px;
 align-items: center;
 }
 .input-row input {
 flex: 1;
 background: var(--bg-dark);
-border: 1px solid var(--border-dark);
+border: 1.5px solid var(--border-dark);
 color: #fff;
-font-size: 14px;
-padding: 12px 14px;
-border-radius: 10px;
+font-size: 15.5px;
+padding: 15px 18px;
+border-radius: 12px;
 font-family: var(--sans);
+transition: border-color 0.15s ease;
 }
+.input-row input::placeholder { color: var(--light-text-dim); }
 .input-row input:focus {
-outline: 2px solid var(--teal-bright);
-outline-offset: 1px;
+outline: none;
+border-color: var(--teal-bright);
+box-shadow: 0 0 0 3px rgba(41,214,182,0.2);
 }
 .icon-btn {
-width: 40px; height: 40px;
+width: 48px; height: 48px;
 flex-shrink: 0;
-border-radius: 10px;
-border: 1px solid var(--border-dark);
+border-radius: 12px;
+border: 1.5px solid var(--border-dark);
 background: var(--bg-dark);
 color: var(--light-text);
 cursor: pointer;
 display: flex; align-items: center; justify-content: center;
-font-size: 15px;
+font-size: 17px;
+transition: transform 0.12s ease, border-color 0.12s ease;
 }
+.icon-btn:hover { border-color: var(--teal-bright); transform: translateY(-1px); }
 .icon-btn.mic.listening {
 background: var(--teal);
 color: var(--bg-dark);
@@ -447,7 +452,9 @@ background: var(--teal);
 color: var(--bg-dark);
 border-color: var(--teal);
 font-weight: 800;
+box-shadow: 0 0 16px rgba(33,181,156,0.45);
 }
+.icon-btn.send:hover { background: var(--teal-bright); border-color: var(--teal-bright); transform: translateY(-1px) scale(1.04); }
 .icon-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ---------- LEAD CARD (reveal) ---------- */
