@@ -387,7 +387,7 @@ animation: blink 1.2s infinite ease-in-out;
 .boat-picker-submit:disabled { opacity: .45; cursor: not-allowed; }
 
 .chat-foot {
-padding: 14px 16px;
+padding: 18px 18px 20px;
 border-top: 1px solid var(--border-dark);
 }
 .match-cta {
@@ -409,34 +409,39 @@ text-align: center;
 .match-cta.show { display: block; }
 .input-row {
 display: flex;
-gap: 8px;
+gap: 10px;
 align-items: center;
 }
 .input-row input {
 flex: 1;
 background: var(--bg-dark);
-border: 1px solid var(--border-dark);
+border: 1.5px solid var(--border-dark);
 color: #fff;
-font-size: 14px;
-padding: 12px 14px;
-border-radius: 10px;
+font-size: 16px;
+padding: 19px 20px;
+border-radius: 13px;
 font-family: var(--sans);
+transition: border-color 0.15s ease;
 }
+.input-row input::placeholder { color: var(--light-text-dim); }
 .input-row input:focus {
-outline: 2px solid var(--teal-bright);
-outline-offset: 1px;
+outline: none;
+border-color: var(--teal-bright);
+box-shadow: 0 0 0 3px rgba(41,214,182,0.2);
 }
 .icon-btn {
-width: 40px; height: 40px;
+width: 56px; height: 56px;
 flex-shrink: 0;
-border-radius: 10px;
-border: 1px solid var(--border-dark);
+border-radius: 13px;
+border: 1.5px solid var(--border-dark);
 background: var(--bg-dark);
 color: var(--light-text);
 cursor: pointer;
 display: flex; align-items: center; justify-content: center;
-font-size: 15px;
+font-size: 19px;
+transition: transform 0.12s ease, border-color 0.12s ease;
 }
+.icon-btn:hover { border-color: var(--teal-bright); transform: translateY(-1px); }
 .icon-btn.mic.listening {
 background: var(--teal);
 color: var(--bg-dark);
@@ -447,7 +452,9 @@ background: var(--teal);
 color: var(--bg-dark);
 border-color: var(--teal);
 font-weight: 800;
+box-shadow: 0 0 16px rgba(33,181,156,0.45);
 }
+.icon-btn.send:hover { background: var(--teal-bright); border-color: var(--teal-bright); transform: translateY(-1px) scale(1.04); }
 .icon-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ---------- LEAD CARD (reveal) ---------- */
@@ -637,12 +644,12 @@ font-family: var(--mono);
 <button class="voice-toggle" id="voiceToggle" title="Read replies aloud">🔊 Voice reply: off</button>
 </div>
 
-<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob — your Personal Boat Advisor. Tell me what you're looking for, and I'll match you with a local dealer who has it. They'll follow up by email. Let's get started!</div></div>
+<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob — your Personal Boat Advisor. Before we get started, what's your first name?</div></div>
 
 <div class="chat-foot">
 <div class="input-row">
 <button class="icon-btn mic" id="micBtn" title="Speak instead of typing">🎤</button>
-<input type="text" id="chatInput" placeholder="Tell us about the aluminum fishing boat you need…" autocomplete="off">
+<input type="text" id="chatInput" placeholder="First Name Please" autocomplete="off">
 <button class="icon-btn send" id="sendBtn" title="Send">➤</button>
 </div>
 </div>
@@ -772,10 +779,9 @@ You must ask about these 9 things IN THIS EXACT ORDER, one per reply, never skip
 7. Their budget for the boat.
 8. When they plan to buy.
 9. How did you hear about us?
-. How did you hear about us?
 
 Rules:
-- Question 1 (boat type) works differently: keep that message to one short, friendly sentence (e.g. "To start, what type of boat are you looking for?") and do not list any boat type names yourself — the interface automatically shows the buyer a full selector. End that specific reply with a new final line containing exactly: SHOW_BOAT_TYPES
+- Question 1 (boat type) works differently: keep that message to one short, friendly sentence (e.g. "Let's find you the perfect boat — to get started, just select the type of boat you're interested in below.") and do not name or describe any specific boat type or category yourself (not even the site's general category, like "aluminum fishing boat") — the interface automatically shows the buyer a full selector right after this message. End that specific reply with a new final line containing exactly: SHOW_BOAT_TYPES
 - That SHOW_BOAT_TYPES line must be the very last line of that first reply, alone, with nothing else on it, and must only ever appear once, on that first question.
 - For questions 2 through 9, ask them ONE AT A TIME, strictly in the order listed above. Do not reorder them, combine them, or skip one even if the buyer's earlier answer seems to partly cover a later question — still ask each one explicitly, briefly acknowledging what they already told you if relevant.
 - Their zip code is already on file, so never ask where they live or what area they're in.
@@ -803,6 +809,8 @@ let leadRecordId = null;
 let selectedBoatTypes = [];
 let leadEmail = null;
 let leadZip = null;
+let buyerFirstName = null;
+let activeSystemPrompt = SYSTEM_PROMPT;
 let pendingText = null;
 
 function addBubble(role, text) {
@@ -867,7 +875,10 @@ doSend(chosen);
 wrap.appendChild(grid);
 wrap.appendChild(submitBtn);
 chatBody.appendChild(wrap);
-chatBody.scrollTop = chatBody.scrollHeight;
+// Intentionally do not force-scroll to the bottom here — the instruction
+// message right above the picker was already scrolled into view when it was
+// added, so leaving scroll position alone keeps that instruction visible
+// instead of jumping straight to the bottom of the 20-item list.
 return wrap;
 }
 
@@ -913,6 +924,7 @@ const record = {
 id: leadRecordId || undefined,
 email: leadEmail,
 zip: leadZip,
+name: buyerFirstName,
 site: 'AluminumFishingBoats.us',
 source_metro: 'New York, NY',
 messages: messages,
@@ -941,6 +953,25 @@ if (!leadCaptured) {
 openGate(text);
 return;
 }
+if (!buyerFirstName) {
+setFirstName(text);
+return;
+}
+doSend(text);
+}
+
+function setFirstName(text) {
+const firstWord = text.trim().split(/\s+/)[0].replace(/[^a-zA-Z'-]/g, '');
+if (!firstWord) {
+chatInput.value = '';
+addBubble('assistant', "Sorry, I didn't catch that — what's your first name?");
+return;
+}
+buyerFirstName = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+activeSystemPrompt = `The buyer just told you their first name is ${buyerFirstName}. Greet them warmly by name in your very next reply, then continue with the normal flow below starting at question 1. Keep using their first name naturally throughout the ENTIRE rest of the conversation, not just at the start — work it in roughly every 2 to 3 replies (acknowledging an answer, transitioning to the next question, wrapping up, etc.) all the way through to the final MATCH_READY message, so the chat feels personal from beginning to end. Do not use it in literally every single reply, and never force it awkwardly into a sentence — but do not stop using it after the first couple of exchanges either.
+
+` + SYSTEM_PROMPT;
+chatInput.placeholder = 'Tell us about the aluminum fishing boat you need…';
 doSend(text);
 }
 
@@ -956,7 +987,7 @@ const typingEl = addTyping();
 let matchReady = false;
 let showBoatTypes = false;
 try {
-const rawReply = await callClaude(messages);
+const rawReply = await callClaude(messages, activeSystemPrompt);
 typingEl.remove();
 const lines = rawReply.split('\n');
 while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
@@ -993,7 +1024,7 @@ If any field wasn't mentioned, make a reasonable brief guess based on context, o
 let data;
 try {
 const msgs = messages.concat([{ role: 'user', content: extractPrompt }]);
-const raw = await callClaude(msgs, SYSTEM_PROMPT);
+const raw = await callClaude(msgs, activeSystemPrompt);
 const cleaned = raw.replace(/```json|```/g, '').trim();
 data = JSON.parse(cleaned);
 } catch (e) {
@@ -1124,12 +1155,16 @@ await saveLeadProgress();
 const toSend = pendingText;
 pendingText = null;
 if (toSend) {
+if (!buyerFirstName) {
+setFirstName(toSend);
+} else {
 doSend(toSend);
+}
 }
 });
 
 // opening message
-messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob — your Personal Boat Advisor. Tell me what you're looking for, and I'll match you with a local dealer who has it. They'll follow up by email. Let's get started!" });
+messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob — your Personal Boat Advisor. Before we get started, what's your first name?" });
 })();
 </script>
 
