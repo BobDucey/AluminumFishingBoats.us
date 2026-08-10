@@ -613,7 +613,6 @@ font-family: var(--mono);
 </div>
 <div class="nav-actions">
 <div class="network-tag">POWERED BY AI BOAT LEADS</div>
-<button class="signup-btn" id="navSignupBtn">Sign Up Free</button>
 </div>
 </nav>
 
@@ -622,7 +621,7 @@ font-family: var(--mono);
 <div class="hero-grid">
 <div>
 <div class="eyebrow">Talk to us: Text/Voice</div>
-<h1>Chat with Capt. Bob, Your Personal Boat Advisor — Always Free</h1>
+<h1>Chat with Capt. Bob about Aluminum Fishing Boats — Always Free</h1>
 <p class="sub">Tell Capt. Bob what you're looking for — boat type, new or used, budget, and timeline — and he'll connect you with the right local dealer.</p>
 <div class="trust-row">
 <div class="trust-item"><span class="tick">✓</span> always free</div>
@@ -644,7 +643,7 @@ font-family: var(--mono);
 <button class="voice-toggle" id="voiceToggle" title="Read replies aloud">🔊 Voice reply: off</button>
 </div>
 
-<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob, your Personal Boat Advisor! Before we get started, what's your first name?</div></div>
+<div class="chat-body" id="chatBody"><div class="bubble assistant"><span class="bubble-label">Capt. Bob</span>Hi, I'm Capt. Bob, your Personal Boat Advisor for Aluminum Fishing Boats! Before we get started, what's your first name?</div></div>
 
 <div class="chat-foot">
 <div class="input-row">
@@ -1096,7 +1095,6 @@ micBtn.title = 'Voice input not supported in this browser';
 const gateOverlay = document.getElementById('gateOverlay');
 const gateForm = document.getElementById('gateForm');
 const gateQuery = document.getElementById('gateQuery');
-const navSignupBtn = document.getElementById('navSignupBtn');
 
 function openGate(text) {
 pendingText = text || null;
@@ -1104,11 +1102,6 @@ gateQuery.textContent = text ? `"${text}"` : 'your next boat';
 gateOverlay.classList.add('show');
 setTimeout(() => document.getElementById('gateZip').focus(), 50);
 }
-
-navSignupBtn.addEventListener('click', () => {
-if (leadCaptured) return;
-openGate(null);
-});
 
 document.getElementById('gateClose').addEventListener('click', () => {
 gateOverlay.classList.remove('show');
@@ -1132,10 +1125,6 @@ leadZip = zip;
 messages.push({ role: 'user', content: `(System note: this buyer already provided their zip code, ${zip}. Do not ask them for their zip code or location again.)` });
 leadCaptured = true;
 
-navSignupBtn.textContent = '✓ Signed Up Free';
-navSignupBtn.style.opacity = '0.75';
-navSignupBtn.style.cursor = 'default';
-
 gateOverlay.classList.remove('show');
 
 // initial save: capture email, zip, and the greeting + first query even before Claude replies
@@ -1153,7 +1142,7 @@ doSend(toSend);
 });
 
 // opening message
-messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob, your Personal Boat Advisor! Before we get started, what's your first name?" });
+messages.push({ role: 'assistant', content: "Hi, I'm Capt. Bob, your Personal Boat Advisor for Aluminum Fishing Boats! Before we get started, what's your first name?" });
 })();
 </script>
 
