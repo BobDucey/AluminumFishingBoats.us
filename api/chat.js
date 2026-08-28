@@ -1,7 +1,35 @@
 // /api/chat.js
 // Receives the buyer's conversation from the website and forwards it to
 // Claude using the API key stored securely in Vercel's environment
-// variables (never exposed to the browser).
+// variables (never exposed to the browser). Also logs a lightweight,
+// content-free chat-engagement event (site, page, session id — no message
+// text) to Supabase, so we can see whether visitors are actually chatting,
+// independent of whether they ever become a captured lead.
+
+async function logChatEvent(site, page, sessionId) {
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey || !sessionId) return;
+
+    await fetch(`${supabaseUrl}/rest/v1/chat_events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({
+        site: site || null,
+        page: page || null,
+        session_id: sessionId,
+      }),
+    });
+  } catch (e) {
+    // Engagement logging must never break the actual chat response.
+    console.error('chat_events logging error:', e);
+  }
+}
 
 export default async function handler(req, res) {
   // Allow the site to call this from the browser
@@ -18,7 +46,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, system } = req.body;
+    const { messages, system, site, page, session_id } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Missing or invalid "messages" array' });
@@ -29,20 +57,23 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server is missing its Anthropic API key' });
     }
 
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
-        system: system || undefined,
-        messages: messages,
+    const [anthropicRes] = await Promise.all([
+      fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          system: system || undefined,
+          messages: messages,
+        }),
       }),
-    });
+      logChatEvent(site, page, session_id),
+    ]);
 
     const data = await anthropicRes.json();
 
