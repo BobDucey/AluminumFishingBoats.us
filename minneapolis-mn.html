@@ -968,6 +968,9 @@ window.speechSynthesis.speak(u);
 }
 
 const BACKEND_URL = 'https://aluminum-fishing-boats-us.vercel.app';
+const SITE_NAME = 'AluminumFishingBoats.us';
+const SOURCE_METRO = 'Minneapolis-St. Paul, MN';
+const CHAT_SESSION_ID = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
 
 async function callClaude(msgs, systemOverride) {
 try {
@@ -976,7 +979,10 @@ method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
 system: systemOverride || SYSTEM_PROMPT,
-messages: msgs
+messages: msgs,
+site: SITE_NAME,
+page: SOURCE_METRO,
+session_id: CHAT_SESSION_ID
 })
 });
 const data = await res.json();
@@ -1000,8 +1006,8 @@ id: leadRecordId || undefined,
 email: leadEmail,
 zip: leadZip,
 name: buyerFirstName,
-site: 'AluminumFishingBoats.us',
-source_metro: 'Minneapolis-St. Paul, MN',
+site: SITE_NAME,
+source_metro: SOURCE_METRO,
 messages: messages,
 ...extra,
 boat_types: selectedBoatTypes
