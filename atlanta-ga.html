@@ -986,6 +986,17 @@ const SITE_NAME = 'AluminumFishingBoats.us';
 const SOURCE_METRO = 'Atlanta, GA';
 const CHAT_SESSION_ID = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
 
+// Log a lightweight page-view (top-of-funnel), independent of whether chat is ever used.
+(function() {
+try {
+fetch(BACKEND_URL + "/api/visit", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ site: SITE_NAME, page: SOURCE_METRO, session_id: CHAT_SESSION_ID })
+}).catch(function(e) { console.error('Visit logging error:', e); });
+} catch (e) {}
+})();
+
 async function callClaude(msgs, systemOverride) {
 try {
 const res = await fetch(BACKEND_URL + "/api/chat", {
