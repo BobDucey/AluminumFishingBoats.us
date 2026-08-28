@@ -7,12 +7,13 @@
 // independent of whether they ever become a captured lead.
 
 async function logChatEvent(site, page, sessionId) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey || !sessionId) {
+    return { skipped: true, hasUrl: !!supabaseUrl, hasKey: !!serviceKey, hasSessionId: !!sessionId };
+  }
   try {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !serviceKey || !sessionId) return;
-
-    await fetch(`${supabaseUrl}/rest/v1/chat_events`, {
+    const resp = await fetch(`${supabaseUrl}/rest/v1/chat_events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,9 +26,17 @@ async function logChatEvent(site, page, sessionId) {
         session_id: sessionId,
       }),
     });
+    if (!resp.ok) {
+      const body = await resp.text();
+      console.error('chat_events insert failed:', resp.status, body);
+      return { ok: false, status: resp.status, body };
+    }
+    console.log('chat_events insert ok');
+    return { ok: true, status: resp.status };
   } catch (e) {
     // Engagement logging must never break the actual chat response.
     console.error('chat_events logging error:', e);
+    return { ok: false, error: String(e) };
   }
 }
 
@@ -57,7 +66,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server is missing its Anthropic API key' });
     }
 
-    const [anthropicRes] = await Promise.all([
+    const [anthropicRes, chatEventDebug] = await Promise.all([
       fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -80,6 +89,10 @@ export default async function handler(req, res) {
     if (!anthropicRes.ok) {
       console.error('Anthropic API error:', data);
       return res.status(anthropicRes.status).json({ error: data.error?.message || 'Anthropic API error' });
+    }
+
+    if (req.body && req.body.debug_chat_events) {
+      data._debug_chat_events = chatEventDebug;
     }
 
     return res.status(200).json(data);
