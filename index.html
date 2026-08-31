@@ -1011,11 +1011,14 @@ body: JSON.stringify(record)
 const data = await res.json();
 if (res.ok && data.lead && data.lead.id) {
 leadRecordId = data.lead.id;
+return data.lead;
 } else {
 console.error('Backend lead save error:', data);
+return null;
 }
 } catch (e) {
 console.error('Network error saving lead:', e);
+return null;
 }
 }
 
@@ -1108,15 +1111,12 @@ budget_timeline: "Not specified",
 summary: "We couldn't auto-summarize this one, but your conversation has been saved so we can follow up with matches."
 };
 }
-addMatchResultBubble(data);
-saveLeadProgress(data);
+const leadResult = await saveLeadProgress(data);
+addMatchResultBubble(data, leadResult);
 }
 
-function addMatchResultBubble(d) {
-// Phase 1 dealer matching isn't live yet, so every buyer sees the honest
-// "no match yet" state. Once /api/match.js exists, replace `false` below
-// with the real match result.
-const realMatchFound = false;
+function addMatchResultBubble(d, leadResult) {
+const realMatchFound = !!(leadResult && leadResult.matched_at && leadResult.matched_dealer_name);
 
 const headline = realMatchFound
 ? 'Good news — we found a local dealer for you!'
