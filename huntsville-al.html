@@ -188,7 +188,8 @@ overflow: hidden;
 display: grid;
 grid-template-columns: 1fr;
 gap: 44px;
-max-width: 1280px;
+max-width: none;
+width: 100%;
 margin: 0 auto;
 position: relative;
 z-index: 2;
@@ -733,17 +734,17 @@ font-family: var(--mono);
 
       if (data.isMarine) {
         titleEl.innerHTML = 'Marine Conditions — <span class="weather-widget-location">' + label + '</span>, ' + metro;
-        iconEl.textContent = '\ud83c\udf0a';
+        iconEl.textContent = '🌊';
       }
 
       var detailLines = '<div class="weather-widget-condition">' + c.shortForecast + '</div>';
-      detailLines += '<div>Wind: ' + (c.windSpeed || '\u2014') + (c.windDirection ? ' ' + c.windDirection : '') + (c.windGust ? ' (gusts ' + c.windGust + ')' : '') + '</div>';
+      detailLines += '<div>Wind: ' + (c.windSpeed || '—') + (c.windDirection ? ' ' + c.windDirection : '') + (c.windGust ? ' (gusts ' + c.windGust + ')' : '') + '</div>';
       if (data.isMarine && c.waveHeight) {
         detailLines += '<div>Waves: ' + c.waveHeight + (c.waveDirection ? ' ' + c.waveDirection : '') + (c.wavePeriod ? ' @ ' + c.wavePeriod : '') + '</div>';
       }
 
       body.innerHTML =
-        '<div class="weather-widget-temp">' + (c.temperature !== null ? c.temperature + '\u00b0' + c.temperatureUnit : '\u2014') + '</div>' +
+        '<div class="weather-widget-temp">' + (c.temperature !== null ? c.temperature + '°' + c.temperatureUnit : '—') + '</div>' +
         '<div class="weather-widget-details">' + detailLines + '</div>';
     })
     .catch(function(){
