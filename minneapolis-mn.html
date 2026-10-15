@@ -670,6 +670,10 @@ html:not(.embedded) .send-icon{display:none;}
 html:not(.embedded) .send-label{display:inline;}
 }
 /* --- end tap-to-answer chat --- */
+.phone-extra{text-align:center;margin-top:10px;}
+.phone-extra[hidden]{display:none;}
+.phone-consent{font-size:12px;line-height:1.35;color:rgba(255,255,255,0.62);}
+.use-email{background:none;border:0;color:var(--teal-bright);text-decoration:underline;font-size:16px;font-family:inherit;padding:10px 12px 2px;cursor:pointer;}
 </style>
 <script>if(window.parent!==window)document.documentElement.classList.add('embedded');</script>
 <!-- Capt. Bob conversion tracking (Google Ads) -->
@@ -714,7 +718,7 @@ html:not(.embedded) .send-label{display:inline;}
 </div>
 </div>
 
-<div class="chat-body" id="chatBody"><div class="bubble assistant current"><span class="bubble-label">Step 1 of 7</span>Good News! We found a Minneapolis-St. Paul Aluminum Fishing Boat dealer. Should we send you the information?</div></div>
+<div class="chat-body" id="chatBody"><div class="bubble assistant current"><span class="bubble-label">Step 1 of 7</span>Good News! We found a Minneapolis-St. Paul Aluminum Fishing Boat dealer. How should we send it to you?</div></div>
 
 <div class="chat-foot tap-only">
 <div class="input-row">
@@ -722,6 +726,7 @@ html:not(.embedded) .send-label{display:inline;}
 <input type="text" id="chatInput" placeholder="Or type here" autocomplete="off">
 <button class="icon-btn send" id="sendBtn" title="Send"><span class="send-icon">➤</span><span class="send-label">Submit</span></button>
 </div>
+<div class="phone-extra" id="phoneExtra" hidden><div class="phone-consent">By entering your number you agree a dealer may call or text you.</div><button type="button" class="use-email" id="useEmailBtn">Use email instead</button></div>
 </div>
 </div>
 </div>
@@ -823,6 +828,7 @@ let leadCaptured = false;
 let leadRecordId = null;
 let selectedBoatTypes = ["Aluminum Fishing Boats"];
 let leadEmail = null;
+let leadPhone = null;
 let leadZip = null;
 let buyerFirstName = null;
 let pendingText = null;
@@ -920,11 +926,12 @@ return "Sorry, I'm having trouble connecting right now — mind trying again in 
 }
 
 async function saveLeadProgress(extra) {
-if (!leadEmail) return;
+if (!leadEmail && !leadPhone) return;
 try {
 const record = {
 id: leadRecordId || undefined,
-email: leadEmail,
+email: leadEmail || null,
+phone: leadPhone || null,
 zip: leadZip,
 name: buyerFirstName,
 site: SITE_NAME,
@@ -959,12 +966,14 @@ try { if (id) sessionStorage.setItem('ad_click_id', id); else id = sessionStorag
 return id;
 })();
 const BOAT_TYPE = 'Aluminum Fishing Boats';
+const PHONE_Q = { key: 'phone', ask: "Great! What's the best mobile number to text it to?" };
+const EMAIL_Q = { key: 'email', ask: "No problem. Where can I email your " + (/craft$/i.test(BOAT_TYPE) ? BOAT_TYPE : BOAT_TYPE.replace(/s$/, '')) + " dealer match?" };
 const BOAT_TYPE_ONE = (/craft$/i.test(BOAT_TYPE) ? BOAT_TYPE : BOAT_TYPE.replace(/s$/, ''));
 const METRO_NAME = String(SOURCE_METRO).split(',')[0].trim();
 const A_METRO = (/^[AEIOU]/i.test(METRO_NAME) ? "an " : "a ") + METRO_NAME;
-const OPENING_MESSAGE = "Good News! We found " + A_METRO + " " + BOAT_TYPE_ONE + " dealer. Should we send you the information?";
+const OPENING_MESSAGE = "Good News! We found " + A_METRO + " " + BOAT_TYPE_ONE + " dealer. How should we send it to you?";
 const QUESTIONS = [
-{ key: 'start', ask: OPENING_MESSAGE, options: ['Yes'] },
+{ key: 'start', ask: OPENING_MESSAGE, options: ['Email', 'Text'] },
 { key: 'email', ask: "Great! What's the best email to send your dealer info to?" },
 { key: 'newused', label: 'New or used', ask: "Are you looking for new or used?", options: ['New', 'Used', 'Either'] },
 { key: 'budget', label: 'Budget', ask: "What's your budget for the boat?", options: ['Under $25K', '$25K–$50K', '$50K–$100K', '$100K–$250K', 'Over $250K'] },
@@ -1009,13 +1018,15 @@ function setInputMode(key) {
 let type = 'text', mode = 'text', auto = 'off', hint = 'Or type here', enter = 'send';
 if (key === 'email') { type = 'email'; mode = 'email'; auto = 'email'; hint = 'Your email'; enter = 'next'; }
 else if (key === 'zip') { mode = 'numeric'; auto = 'postal-code'; hint = 'Zip code'; enter = 'next'; }
+else if (key === 'phone') { type = 'tel'; mode = 'tel'; auto = 'tel'; hint = 'Mobile number'; enter = 'next'; }
 else if (key === 'name') { auto = 'given-name'; hint = 'First name'; enter = 'done'; }
 else if (!key) { hint = 'Type a message'; }
 try { chatInput.type = type; } catch (e) {}
 chatInput.setAttribute('inputmode', mode);
 chatInput.setAttribute('autocomplete', auto);
 chatInput.setAttribute('enterkeyhint', enter);
-chatInput.setAttribute('name', key === 'email' ? 'email' : key === 'zip' ? 'postal-code' : key === 'name' ? 'given-name' : 'message');
+try { document.getElementById('phoneExtra').hidden = key !== 'phone'; } catch (e) {}
+chatInput.setAttribute('name', key === 'phone' ? 'tel' : key === 'email' ? 'email' : key === 'zip' ? 'postal-code' : key === 'name' ? 'given-name' : 'message');
 chatInput.placeholder = hint;
 }
 
@@ -1084,6 +1095,13 @@ const m = String(text).match(/[^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,}/);
 return m ? m[0].replace(/[.!?]+$/, '') : null;
 }
 
+function findPhone(text) {
+let d = String(text).replace(/\D/g, '');
+if (d.length === 11 && d[0] === '1') d = d.slice(1);
+if (d.length !== 10 || /^[01]/.test(d) || /^\d{3}[01]/.test(d) || /^(\d)\1+$/.test(d)) return null;
+return '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+}
+
 function findZip(text) {
 const m = String(text).match(/(?:^|\D)(\d{5})(?:-\d{4})?(?!\d)/);
 return m ? m[1] : null;
@@ -1128,7 +1146,7 @@ summary: 'Shopping for ' + BOAT_TYPE + ' near ' + SOURCE_METRO + '. ' + parts.jo
 // Saves run one at a time so a second save always reuses the first one's lead record.
 let saveQueue = Promise.resolve();
 function queueLeadSave() {
-if (!leadEmail) return saveQueue;
+if (!leadEmail && !leadPhone) return saveQueue;
 leadCaptured = true;
 saveQueue = saveQueue.then(function () { return saveLeadProgress(leadFields()); });
 return saveQueue;
@@ -1141,18 +1159,20 @@ speak(text);
 }
 
 function askQuestion(q) {
-say((q.key === 'newused' && leadEmail && !answers.newused ? 'Thanks! We\'ll send it to ' + leadEmail + '. ' : '') + q.ask);
+say((q.key === 'newused' && (leadPhone || leadEmail) && !answers.newused ? 'Thanks! We\'ll send it to ' + (leadPhone || leadEmail) + '. ' : '') + q.ask);
 showQuestionUI(q);
 }
 
 function acceptAnswer(q, value) {
 answers[q.key] = value;
+if (q.key === 'start' && /text/i.test(value)) QUESTIONS[1] = PHONE_Q;
 if (q.key === 'email') leadEmail = value;
+else if (q.key === 'phone') leadPhone = value;
 else if (q.key === 'zip') leadZip = value;
 else if (q.key === 'name') buyerFirstName = value;
 step++;
 // Skip email or zip if the buyer already gave it (for example through the sign-up box).
-while (QUESTIONS[step] && ((QUESTIONS[step].key === 'email' && leadEmail) || (QUESTIONS[step].key === 'zip' && leadZip))) step++;
+while (QUESTIONS[step] && (((QUESTIONS[step].key === 'email' || QUESTIONS[step].key === 'phone') && (leadEmail || leadPhone)) || (QUESTIONS[step].key === 'zip' && leadZip))) step++;
 clearQuickReplies();
 const next = QUESTIONS[step];
 if (!next) { finishChat(); return; }
@@ -1224,6 +1244,10 @@ value = tapped ? text : matchOption(text, q.options);
 } else if (q.key === 'email') {
 value = findEmail(text);
 if (!value && (text.indexOf('@') !== -1 || !/\s/.test(text))) nudge = "That email doesn't look right. Could you double-check it and send it again?";
+} else if (q.key === 'phone') {
+value = findPhone(text);
+if (!value && findEmail(text)) { logStep(); acceptAnswer(EMAIL_Q, findEmail(text)); return; }
+if (!value && /\d/.test(text)) nudge = "I need a 10-digit mobile number. Could you double-check it and send it again?";
 } else if (q.key === 'zip') {
 value = findZip(text);
 if (!value && /\d/.test(text)) nudge = "I need a 5-digit zip code. Could you double-check it and send it again?";
@@ -1271,6 +1295,12 @@ return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&l
 }
 
 // events
+document.getElementById('useEmailBtn').addEventListener('click', function () {
+if (busy || chatDone || !QUESTIONS[step] || QUESTIONS[step].key !== 'phone') return;
+QUESTIONS[step] = EMAIL_Q;
+try { chatInput.value = ''; chatInput.blur(); setInputMode('email'); chatInput.focus(); } catch (e) {}
+askQuestion(EMAIL_Q);
+});
 sendBtn.addEventListener('click', () => trySend(chatInput.value));
 chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') trySend(chatInput.value); });
 leadClose.addEventListener('click', () => leadOverlay.classList.remove('show'));
